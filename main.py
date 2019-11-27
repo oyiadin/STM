@@ -125,6 +125,7 @@ def main():
 
         # evaluate on validation set
         if (epoch + 1) % args.eval_freq == 0 or epoch == args.epochs - 1:
+            torch.cuda.empty_cache()
             prec1 = validate(val_loader, model, criterion, (epoch + 1) * len(train_loader))
 
             # remember best prec@1 and save checkpoint
@@ -222,9 +223,9 @@ def validate(val_loader, model, criterion, iter, logger=None):
         # measure accuracy and record loss
         prec1, prec5 = accuracy(output.data, target, topk=(1,5))
 
-        losses.update(loss.data[0], input.size(0))
-        top1.update(prec1[0], input.size(0))
-        top5.update(prec5[0], input.size(0))
+        losses.update(loss.data.item(), input.size(0))
+        top1.update(prec1.item(), input.size(0))
+        top5.update(prec5.item(), input.size(0))
 
         # measure elapsed time
         batch_time.update(time.time() - end)
