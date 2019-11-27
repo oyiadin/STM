@@ -41,7 +41,7 @@ def main():
     policies = model.get_optim_policies()
     train_augmentation = model.get_augmentation()
 
-    model = torch.nn.DataParallel(model, device_ids=args.gpus).cuda()
+    model = torch.nn.DataParallel(model, device_ids=args.gpus).to("cuda")
 
     if args.resume:
         if os.path.isfile(args.resume):
@@ -158,7 +158,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         # measure data loading time
         data_time.update(time.time() - end)
 
-        target = target.cuda(async=True)
+        target = target.cuda()
         input_var = torch.autograd.Variable(input)
         target_var = torch.autograd.Variable(target)
 
@@ -168,9 +168,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(output.data, target, topk=(1,5))
-        losses.update(loss.data[0], input.size(0))
-        top1.update(prec1[0], input.size(0))
-        top5.update(prec5[0], input.size(0))
+        losses.update(loss.data.item(), input.size(0))
+        top1.update(prec1.item(), input.size(0))
+        top5.update(prec5.item(), input.size(0))
 
 
         # compute gradient and do SGD step
@@ -211,7 +211,7 @@ def validate(val_loader, model, criterion, iter, logger=None):
 
     end = time.time()
     for i, (input, target) in enumerate(val_loader):
-        target = target.cuda(async=True)
+        target = target.cuda()
         input_var = torch.autograd.Variable(input, volatile=True)
         target_var = torch.autograd.Variable(target, volatile=True)
 
